@@ -1,0 +1,114 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Enviro365 | Investor portal</title>
+
+  <link rel="stylesheet" href="/css/styles.css">
+
+  <script src="/js/index.js" defer></script>
+
+</head>
+
+<body>
+
+  <header><div class="container topbar"><a class="brand" href="#portfolio">Enviro365 <span>Investor portal</span></a><nav aria-label="Main navigation"><a href="#portfolio">Portfolio</a><a href="#withdrawal">Withdraw</a><a href="#history">History</a></nav></div></header>
+
+  <main class="container">
+
+    <section class="investor-summary" aria-labelledby="investor-name">
+      <div class="investor-summary-main">
+        <p class="eyebrow">INVESTOR PORTFOLIO</p>
+        <div class="investor-picker"><label for="investor-select">Choose example investor</label><select id="investor-select" disabled><option>Loading investors...</option></select></div>
+        <div class="investor-name-row"><h1 id="investor-name">Loading portfolio...</h1><span id="investor-age" class="investor-age"></span></div>
+        <p class="summary-balance-label">Total investment balance</p>
+        <p id="total-balance" class="investor-total"></p>
+        <p id="product-count" class="muted"></p>
+      </div>
+      <div class="investor-summary-side">
+        <span class="badge">Example investor accounts</span>
+        <div class="withdrawal-summary">
+          <p class="withdrawal-summary-label">Available to withdraw</p>
+          <p id="available-total" class="withdrawal-summary-value"></p>
+          <p class="withdrawal-summary-help">Up to 90% of eligible product balances. Retirement requires an age above 65.</p>
+          <a class="withdrawal-summary-action" href="#withdrawal">Create withdrawal notice <span aria-hidden="true">→</span></a>
+        </div>
+        <a class="notice-link" href="#history"><span>Withdrawal notices</span><strong id="notice-count">0</strong><span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+    <p class="demo-note">Use the example investor selector. Balances and withdrawal notices are saved in the local H2 database.</p>
+
+    <section id="portfolio" aria-labelledby="portfolio-heading">
+
+      <h2 id="portfolio-heading" class="visually-hidden">Portfolio overview</h2>
+
+      <div class="panel balance-overview" aria-labelledby="chart-heading">
+
+        <div class="chart-main">
+
+          <div class="section-heading"><div><p class="eyebrow">PORTFOLIO BREAKDOWN</p><h2 id="chart-heading">Where your money is invested</h2></div><span class="chart-unit">ZAR</span></div>
+
+          <p class="muted">Compare the current balance of each investment product.</p>
+
+          <div class="pie-layout">
+
+            <div id="balance-pie" class="pie-chart" role="img" aria-label="Investment allocation"></div>
+
+            <ul id="balance-chart" class="pie-legend" aria-label="Investment balances and percentages"></ul>
+
+          </div>
+
+        </div>
+
+
+
+      </div>
+
+
+
+      <div class="panel"><h2>Investment products</h2><div class="table-wrap"><table><caption class="visually-hidden">Investment balances and maximum withdrawal amounts</caption><thead><tr><th>Product</th><th>Balance</th><th>Maximum withdrawal</th></tr></thead><tbody id="products"></tbody></table></div></div>
+
+    </section>
+
+    <section id="withdrawal" class="panel" aria-labelledby="withdrawal-heading">
+
+      <h2 id="withdrawal-heading">Create a withdrawal notice</h2><p class="muted">You can withdraw up to 90% of a product's current balance.</p>
+
+      <form id="withdrawal-form" novalidate>
+
+        <div class="form-grid"><div><label for="product">Investment product</label><select id="product" name="product" required aria-describedby="product-error eligibility-help"><option value="">Loading products...</option></select><p id="product-error" class="error" aria-live="polite"></p></div><div><label for="amount">Withdrawal amount (ZAR)</label><input id="amount" name="amount" type="number" min="0.01" max="9999999999999.99" step="0.01" placeholder="e.g. 10000.00" required aria-describedby="amount-help amount-error feedback"><p id="amount-help" class="help"></p><p id="amount-error" class="error" aria-live="polite"></p></div></div>
+
+        <p id="eligibility-help" class="help"></p>
+
+        <p id="feedback" role="status" aria-live="polite"></p><button id="submit-notice" type="submit" disabled>Create withdrawal notice</button>
+
+      </form>
+
+    </section>
+
+    <section id="history" class="panel" aria-labelledby="history-heading">
+
+      <div class="section-heading"><h2 id="history-heading">Withdrawal history</h2><button id="download" class="secondary" type="button" disabled>Download CSV</button></div>
+
+      <div class="filters"><div><label for="history-product">Product</label><select id="history-product"><option value="">All products</option></select></div><div><label for="from">From date</label><input type="date" id="from"></div><div><label for="to">To date</label><input type="date" id="to"></div><button id="clear-filters" type="button" class="secondary">Clear filters</button></div>
+
+      <p id="filter-error" class="error" role="status"></p>
+
+      <div class="table-wrap"><table><caption class="visually-hidden">Saved withdrawal notices</caption><thead><tr><th>Date</th><th>Product</th><th>Amount</th><th>Remaining balance</th></tr></thead><tbody id="history-rows"></tbody></table></div>
+
+    </section>
+
+  </main>
+
+  <footer class="container">Enviro365 investor portal · Assessment UI</footer>
+
+</body>
+
+</html>
+
