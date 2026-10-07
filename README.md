@@ -105,6 +105,12 @@ Frontend → Controller → Service → Repository → H2 database
 Frontend ← Controller ← Service ← Repository ← H2 database
 ```
 
+### How it works
+
+The diagram shows selecting an investor, an accepted withdrawal and a rejected withdrawal. A rejected withdrawal leaves the balance unchanged and creates no notice.
+
+![Investor selection, accepted withdrawal and rejected withdrawal](docs/images/portal-flow.png)
+
 Four advanced options are included: a DTO layer, input validation, automated tests and UI validation. Expected request errors are handled inside the portfolio controller.
 
 ## Testing
