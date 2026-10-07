@@ -90,7 +90,9 @@ src/main/java/com/enviro/assessment/junior/thabiso/kojoana/
 src/main/resources/static/
   index.html       → Dashboard structure
   css/styles.css   → Desktop styling
-  js/index.js      → Handles selections, forms and API requests
+  js/index.js      → Loads accounts and displays the portfolio
+  js/history.js    → Handles date filters, totals and CSV downloads
+  js/withdrawal.js → Validates and confirms withdrawal requests
 
 src/test/java/com/enviro/assessment/junior/thabiso/kojoana/
                    → JUnit rule, API and sample-history tests
