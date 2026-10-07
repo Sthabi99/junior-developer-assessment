@@ -4,6 +4,7 @@ import com.enviro.assessment.junior.thabiso.kojoana.model.*;
 import com.enviro.assessment.junior.thabiso.kojoana.repository.*;
 import java.math.BigDecimal;
 import java.time.*;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -39,21 +40,30 @@ public class SeedData implements CommandLineRunner {
 
   private void addSampleHistory() {
     for (Investor investor : investors.findAll()) {
-      var history = withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(investor.getId());
+      List<WithdrawalNotice> history =
+          withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(investor.getId());
       boolean isThabo = investor.getName().equals("Thabo Dlamini");
       boolean isNaledi = investor.getName().equals("Naledi Mokoena");
       boolean isSipho = investor.getName().equals("Sipho Nkosi");
       if (!isThabo && !isNaledi && !isSipho) continue;
-      int targetCount = isThabo ? 3 : 2;
+      int targetCount = 2;
+      if (isThabo) {
+        targetCount = 3;
+      }
       int remaining = targetCount - history.size();
       if (remaining <= 0) continue;
 
       // Products with saved history are skipped, so restarting does not duplicate withdrawals.
-      var investorProducts = products.findByInvestorIdOrderById(investor.getId());
+      List<InvestmentProduct> investorProducts =
+          products.findByInvestorIdOrderById(investor.getId());
       for (InvestmentProduct product : investorProducts) {
-        boolean hasHistory =
-            history.stream()
-                .anyMatch(notice -> notice.getProduct().getId().equals(product.getId()));
+        boolean hasHistory = false;
+        for (WithdrawalNotice notice : history) {
+          if (notice.getProduct().getId().equals(product.getId())) {
+            hasHistory = true;
+            break;
+          }
+        }
         if (hasHistory || remaining <= 0) continue;
         if (product.getType() == ProductType.RETIREMENT) {
           int age = Period.between(investor.getDateOfBirth(), LocalDate.now()).getYears();

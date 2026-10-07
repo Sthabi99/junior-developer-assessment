@@ -5,12 +5,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.enviro.assessment.junior.thabiso.kojoana.dto.BalancePointDto;
+import com.enviro.assessment.junior.thabiso.kojoana.dto.PortfolioDto;
+import com.enviro.assessment.junior.thabiso.kojoana.dto.WithdrawalDto;
 import com.enviro.assessment.junior.thabiso.kojoana.dto.WithdrawalRequest;
 import com.enviro.assessment.junior.thabiso.kojoana.model.*;
 import com.enviro.assessment.junior.thabiso.kojoana.repository.*;
 import com.enviro.assessment.junior.thabiso.kojoana.service.PortfolioService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,20 +38,27 @@ class PortfolioApiTests {
 
   @BeforeEach
   void findExamples() {
-    thabo =
-        investors.findAll().stream()
-            .filter(i -> i.getName().equals("Thabo Dlamini"))
-            .findFirst()
-            .orElseThrow();
+    thabo = findInvestor("Thabo Dlamini");
     retirement = product(thabo, ProductType.RETIREMENT);
     savings = product(thabo, ProductType.SAVINGS);
   }
 
+  Investor findInvestor(String name) {
+    for (Investor investor : investors.findAll()) {
+      if (investor.getName().equals(name)) {
+        return investor;
+      }
+    }
+    throw new IllegalStateException("Test investor not found: " + name);
+  }
+
   InvestmentProduct product(Investor investor, ProductType type) {
-    return products.findByInvestorIdOrderById(investor.getId()).stream()
-        .filter(p -> p.getType() == type)
-        .findFirst()
-        .orElseThrow();
+    for (InvestmentProduct product : products.findByInvestorIdOrderById(investor.getId())) {
+      if (product.getType() == type) {
+        return product;
+      }
+    }
+    throw new IllegalStateException("Test product not found: " + type);
   }
 
   String url(String suffix) {
@@ -99,11 +110,7 @@ class PortfolioApiTests {
 
   @Test
   void exactly65CannotWithdrawRetirementButCanWithdrawSavings() throws Exception {
-    Investor naledi =
-        investors.findAll().stream()
-            .filter(i -> i.getName().equals("Naledi Mokoena"))
-            .findFirst()
-            .orElseThrow();
+    Investor naledi = findInvestor("Naledi Mokoena");
     String path = "/api/investors/" + naledi.getId() + "/withdrawals";
     mvc.perform(
             post(path)
@@ -167,11 +174,7 @@ class PortfolioApiTests {
 
   @Test
   void cannotUseAnotherInvestorsProduct() throws Exception {
-    Investor other =
-        investors.findAll().stream()
-            .filter(i -> !i.getId().equals(thabo.getId()))
-            .findFirst()
-            .orElseThrow();
+    Investor other = findInvestor("Naledi Mokoena");
     mvc.perform(
             post(url("/withdrawals"))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -224,20 +227,22 @@ class PortfolioApiTests {
   void openingAndWithdrawalBalancesAreRecordedForTheChart() {
     service.createWithdrawal(
         thabo.getId(), new WithdrawalRequest(retirement.getId(), new BigDecimal("100")));
-    var portfolio = service.portfolio(thabo.getId());
-    var history =
-        portfolio.products().stream()
-            .filter(p -> p.id().equals(retirement.getId()))
-            .findFirst()
-            .orElseThrow()
-            .history();
+    PortfolioDto portfolio = service.portfolio(thabo.getId());
+    List<BalancePointDto> history = new java.util.ArrayList<>();
+    for (com.enviro.assessment.junior.thabiso.kojoana.dto.ProductDto product :
+        portfolio.products()) {
+      if (product.id().equals(retirement.getId())) {
+        history = product.history();
+        break;
+      }
+    }
     assertEquals(2, history.size());
     assertEquals(0, history.get(1).balance().compareTo(new BigDecimal("99900")));
   }
 
   @Test
   void theCreatedNoticeCanBeRetrieved() throws Exception {
-    var notice =
+    WithdrawalDto notice =
         service.createWithdrawal(
             thabo.getId(), new WithdrawalRequest(savings.getId(), new BigDecimal("25")));
     mvc.perform(get(url("/withdrawals/") + notice.id()))
@@ -261,8 +266,9 @@ class PortfolioApiTests {
                 new BigDecimal("100000"),
                 new BigDecimal("100000"),
                 java.time.LocalDateTime.now()));
-    var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
-    var start = new java.util.concurrent.CountDownLatch(1);
+    java.util.concurrent.ExecutorService executor =
+        java.util.concurrent.Executors.newFixedThreadPool(2);
+    java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
     try {
       java.util.concurrent.Callable<Boolean> attempt =
           () -> {
@@ -278,12 +284,16 @@ class PortfolioApiTests {
               return false;
             }
           };
-      var first = executor.submit(attempt);
-      var second = executor.submit(attempt);
+      java.util.concurrent.Future<Boolean> first = executor.submit(attempt);
+      java.util.concurrent.Future<Boolean> second = executor.submit(attempt);
       start.countDown();
-      int successes =
-          (first.get(20, java.util.concurrent.TimeUnit.SECONDS) ? 1 : 0)
-              + (second.get(20, java.util.concurrent.TimeUnit.SECONDS) ? 1 : 0);
+      int successes = 0;
+      if (first.get(20, java.util.concurrent.TimeUnit.SECONDS)) {
+        successes++;
+      }
+      if (second.get(20, java.util.concurrent.TimeUnit.SECONDS)) {
+        successes++;
+      }
       assertEquals(1, successes);
       assertEquals(
           0,

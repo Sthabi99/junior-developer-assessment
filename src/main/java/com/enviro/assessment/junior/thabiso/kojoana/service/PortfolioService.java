@@ -30,7 +30,11 @@ public class PortfolioService {
   }
 
   private Investor investor(Long id) {
-    return investors.findById(id).orElseThrow(() -> new NotFoundException("Investor not found."));
+    Optional<Investor> found = investors.findById(id);
+    if (found.isEmpty()) {
+      throw new NotFoundException("Investor not found.");
+    }
+    return found.get();
   }
 
   private InvestorDto investorDto(Investor investor) {
@@ -54,7 +58,11 @@ public class PortfolioService {
 
   @Transactional(readOnly = true)
   public List<InvestorDto> listInvestors() {
-    return investors.findAll().stream().map(this::investorDto).toList();
+    List<InvestorDto> result = new ArrayList<>();
+    for (Investor investor : investors.findAll()) {
+      result.add(investorDto(investor));
+    }
+    return result;
   }
 
   @Transactional(readOnly = true)
@@ -63,24 +71,30 @@ public class PortfolioService {
     List<WithdrawalNotice> notices =
         withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(id);
     List<ProductDto> result = new ArrayList<>();
-    BigDecimal total = BigDecimal.ZERO, available = BigDecimal.ZERO;
+    BigDecimal total = BigDecimal.ZERO;
+    BigDecimal available = BigDecimal.ZERO;
+    // Notices arrive newest first. Reverse a copy to build the balance history oldest first.
+    List<WithdrawalNotice> oldestFirst = new ArrayList<>(notices);
+    Collections.reverse(oldestFirst);
     for (InvestmentProduct product : products.findByInvestorIdOrderById(id)) {
       boolean allowed =
           rules.allowed(product.getType(), investor.getDateOfBirth(), LocalDate.now());
-      BigDecimal maximum =
-          allowed ? rules.maximum(product.getBalance()) : BigDecimal.ZERO.setScale(2);
+      BigDecimal maximum = BigDecimal.ZERO.setScale(2);
+      String eligibilityMessage = "Retirement withdrawals require an age above 65.";
+      if (allowed) {
+        maximum = rules.maximum(product.getBalance());
+        eligibilityMessage = "Up to 90% of the current balance.";
+      }
       total = total.add(product.getBalance());
       available = available.add(maximum);
       List<BalancePointDto> history = new ArrayList<>();
       history.add(new BalancePointDto(product.getOpenedAt(), product.getOpeningBalance()));
       // Balance history contains the opening balance and saved withdrawal events.
-      notices.stream()
-          .filter(n -> n.getProduct().getId().equals(product.getId()))
-          .sorted(
-              Comparator.comparing(WithdrawalNotice::getCreatedAt)
-                  .thenComparing(WithdrawalNotice::getId))
-          .forEach(
-              n -> history.add(new BalancePointDto(n.getCreatedAt(), n.getRemainingBalance())));
+      for (WithdrawalNotice notice : oldestFirst) {
+        if (notice.getProduct().getId().equals(product.getId())) {
+          history.add(new BalancePointDto(notice.getCreatedAt(), notice.getRemainingBalance()));
+        }
+      }
       result.add(
           new ProductDto(
               product.getId(),
@@ -89,9 +103,7 @@ public class PortfolioService {
               product.getBalance(),
               maximum,
               allowed,
-              allowed
-                  ? "Up to 90% of the current balance."
-                  : "Retirement withdrawals require an age above 65.",
+              eligibilityMessage,
               history));
     }
     return new PortfolioDto(investorDto(investor), total, available, notices.size(), result);
@@ -100,10 +112,11 @@ public class PortfolioService {
   @Transactional(readOnly = true)
   public WithdrawalDto withdrawal(Long investorId, Long noticeId) {
     investor(investorId);
-    WithdrawalNotice notice =
-        withdrawals
-            .findById(noticeId)
-            .orElseThrow(() -> new NotFoundException("Withdrawal notice not found."));
+    Optional<WithdrawalNotice> found = withdrawals.findById(noticeId);
+    if (found.isEmpty()) {
+      throw new NotFoundException("Withdrawal notice not found.");
+    }
+    WithdrawalNotice notice = found.get();
     if (!notice.getProduct().getInvestor().getId().equals(investorId))
       throw new NotFoundException("Withdrawal notice does not belong to this investor.");
     return noticeDto(notice);
@@ -114,10 +127,11 @@ public class PortfolioService {
     Investor investor = investor(investorId);
     // The product stays locked until this transaction finishes. Another request waits,
     // then uses the updated balance instead of spending the same balance twice.
-    InvestmentProduct product =
-        products
-            .findForWithdrawal(request.productId())
-            .orElseThrow(() -> new NotFoundException("Product not found."));
+    Optional<InvestmentProduct> found = products.findForWithdrawal(request.productId());
+    if (found.isEmpty()) {
+      throw new NotFoundException("Product not found.");
+    }
+    InvestmentProduct product = found.get();
     if (!product.getInvestor().getId().equals(investorId))
       throw new NotFoundException("Product does not belong to this investor.");
     // Validation runs before the stored balance changes.
@@ -147,20 +161,32 @@ public class PortfolioService {
     if (from != null && to != null && from.isAfter(to))
       throw new ValidationException("from", "From date must be on or before To date.");
     if (productId != null) {
-      InvestmentProduct product =
-          products
-              .findById(productId)
-              .orElseThrow(() -> new NotFoundException("Product not found."));
+      Optional<InvestmentProduct> found = products.findById(productId);
+      if (found.isEmpty()) {
+        throw new NotFoundException("Product not found.");
+      }
+      InvestmentProduct product = found.get();
       if (!product.getInvestor().getId().equals(investorId))
         throw new NotFoundException("Product does not belong to this investor.");
     }
     // Both selected dates are included. An empty product filter includes all products.
-    return withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(investorId).stream()
-        .filter(n -> productId == null || n.getProduct().getId().equals(productId))
-        .filter(n -> from == null || !n.getCreatedAt().toLocalDate().isBefore(from))
-        .filter(n -> to == null || !n.getCreatedAt().toLocalDate().isAfter(to))
-        .map(this::noticeDto)
-        .toList();
+    List<WithdrawalDto> result = new ArrayList<>();
+    List<WithdrawalNotice> notices =
+        withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(investorId);
+    for (WithdrawalNotice notice : notices) {
+      LocalDate recordedDate = notice.getCreatedAt().toLocalDate();
+      if (productId != null && !notice.getProduct().getId().equals(productId)) {
+        continue;
+      }
+      if (from != null && recordedDate.isBefore(from)) {
+        continue;
+      }
+      if (to != null && recordedDate.isAfter(to)) {
+        continue;
+      }
+      result.add(noticeDto(notice));
+    }
+    return result;
   }
 
   public String csv(List<WithdrawalDto> notices) {

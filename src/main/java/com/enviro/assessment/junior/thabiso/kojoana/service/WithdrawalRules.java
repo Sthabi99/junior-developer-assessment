@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 @Component
 // These rules are shared by portfolio eligibility checks and withdrawal validation.
 public class WithdrawalRules {
-  // Age uses completed years, so someone whose birthday is still coming up is not counted a year older.
+  // Age uses completed years, so someone whose birthday is still coming up is not counted a year
+  // older.
   public int age(LocalDate birthDate, LocalDate today) {
     return Period.between(birthDate, today).getYears();
   }
@@ -20,7 +21,8 @@ public class WithdrawalRules {
   }
 
   public BigDecimal maximum(BigDecimal balance) {
-    // Rounding down keeps the maximum within 90%, including balances that leave a fraction of a cent.
+    // Rounding down keeps the maximum within 90%, including balances that leave a fraction of a
+    // cent.
     return balance.multiply(new BigDecimal("0.90")).setScale(2, RoundingMode.DOWN);
   }
 

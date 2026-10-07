@@ -14,6 +14,7 @@ import java.util.Map;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -93,7 +94,7 @@ public class PortfolioController {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorDto> invalidFields(MethodArgumentNotValidException error) {
     Map<String, String> fields = new LinkedHashMap<>();
-    for (var field : error.getBindingResult().getFieldErrors()) {
+    for (FieldError field : error.getBindingResult().getFieldErrors()) {
       fields.putIfAbsent(field.getField(), field.getDefaultMessage());
     }
     return ResponseEntity.badRequest().body(new ErrorDto("Check the highlighted fields.", fields));
