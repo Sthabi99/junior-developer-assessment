@@ -87,7 +87,7 @@ public class PortfolioService {
     }
     public String csv(List<WithdrawalDto> notices) {
         // Tell Excel to use commas even when Windows uses a different list separator.
-        StringBuilder csv = new StringBuilder("\uFEFFsep=,\r\nNotice ID,Recorded at,Product,Amount ZAR,Balance before ZAR,Remaining balance ZAR\r\n");
+        StringBuilder csv = new StringBuilder("\uFEFFsep=,\r\nNotice ID,Recorded at,Product,Amount (R),Balance before (R),Remaining balance (R)\r\n");
         for (WithdrawalDto notice : notices) {
             csv.append(notice.id()).append(',').append(notice.createdAt()).append(',').append(csvCell(notice.productName())).append(',')
                 .append(notice.amount().toPlainString()).append(',').append(notice.balanceBefore().toPlainString()).append(',')

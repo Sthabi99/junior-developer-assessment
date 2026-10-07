@@ -99,7 +99,7 @@ class PortfolioApiTests {
             .andExpect(jsonPath("$", hasSize(1))).andExpect(jsonPath("$[0].productName").value("Savings investment"));
         mvc.perform(get(url("/withdrawals/export") + query)).andExpect(status().isOk())
             .andExpect(header().string("Content-Disposition", containsString("attachment")))
-            .andExpect(content().string(allOf(containsString("\uFEFFsep=,\r\nNotice ID,Recorded at,Product,Amount ZAR,Balance before ZAR,Remaining balance ZAR\r\n"), containsString("\"Savings investment\",50.00,20000.00,19950.00\r\n"), not(containsString("Retirement investment")))));
+            .andExpect(content().string(allOf(containsString("\uFEFFsep=,\r\nNotice ID,Recorded at,Product,Amount (R),Balance before (R),Remaining balance (R)\r\n"), containsString("\"Savings investment\",50.00,20000.00,19950.00\r\n"), not(containsString("Retirement investment")))));
         mvc.perform(get(url("/withdrawals") + "?from=" + LocalDate.now().plusDays(1))).andExpect(jsonPath("$", hasSize(0)));
     }
     @Test void invalidFiltersAndMissingInvestorsReturnUsefulErrors() throws Exception {

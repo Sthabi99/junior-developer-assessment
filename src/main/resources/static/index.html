@@ -28,7 +28,7 @@
           <p class="eyebrow">INVESTOR PORTFOLIO</p>
 
           <div class="investor-picker">
-            <label for="investor-select">Choose example investor</label
+            <label for="investor-select">Choose an investor</label
             ><select id="investor-select" disabled>
               <option>Loading investors...</option>
             </select>
@@ -55,7 +55,7 @@
             <p id="available-total" class="withdrawal-summary-value"></p>
 
             <p class="withdrawal-summary-help">
-              Up to 90% of eligible product balances. Retirement requires an age above 65.
+              Up to 90% of eligible product balances. Retirement withdrawals are available only to investors older than 65.
             </p>
 
             <a class="withdrawal-summary-action" href="#withdrawal"
@@ -70,11 +70,6 @@
         </div>
       </section>
 
-      <p class="demo-note">
-        Use the example investor selector. Balances and withdrawal notices are saved in the local H2
-        database.
-      </p>
-
       <section id="portfolio" aria-labelledby="portfolio-heading">
         <h2 id="portfolio-heading" class="visually-hidden">Portfolio overview</h2>
 
@@ -85,7 +80,7 @@
                 <p class="eyebrow">PORTFOLIO BREAKDOWN</p>
                 <h2 id="chart-heading">Where your money is invested</h2>
               </div>
-              <span class="chart-unit">ZAR</span>
+              <span class="chart-unit">R</span>
             </div>
 
             <p class="muted">Compare the current balance of each investment product.</p>
@@ -117,8 +112,8 @@
               <thead>
                 <tr>
                   <th>Product</th>
-                  <th>Balance</th>
-                  <th>Maximum withdrawal</th>
+                  <th>Balance (R)</th>
+                  <th>Maximum withdrawal (R)</th>
                 </tr>
               </thead>
               <tbody id="products"></tbody>
@@ -146,7 +141,7 @@
               <p id="product-error" class="error" aria-live="polite"></p>
             </div>
             <div>
-              <label for="amount">Withdrawal amount (ZAR)</label
+              <label for="amount">Withdrawal amount (R)</label
               ><input
                 id="amount"
                 name="amount"
@@ -208,8 +203,8 @@
               <tr>
                 <th>Date</th>
                 <th>Product</th>
-                <th>Amount</th>
-                <th>Remaining balance</th>
+                <th>Amount (R)</th>
+                <th>Remaining balance (R)</th>
               </tr>
             </thead>
             <tbody id="history-rows"></tbody>

@@ -52,7 +52,7 @@ Selecting an investor in the UI loads their portfolio and withdrawal history. Th
 GET /api/investors/1/portfolio
 ```
 
-Complete example for a new database initialized on 8 October 2026, including Thabo's three sample notices and both products. IDs and timestamps are illustrative; existing databases may contain other records. No fields have been omitted.
+Complete example for a new database initialised on 8 October 2026, including Thabo's three sample notices and both products. IDs and timestamps are illustrative; existing databases may contain other records. No fields have been omitted.
 
 ```json
 {
@@ -141,7 +141,7 @@ Success returns **201 Created**, with `Location: /api/investors/1/withdrawals/8`
 }
 ```
 
-The timestamp is illustrative; the server records the actual time. This withdrawal changes retirement from R100,000 to R90,000. Savings stays at R20,000, so the new total balance is R110,000, the available withdrawal amount is R99,000 and the notice count becomes 4. The frontend reloads the portfolio and history after success.
+The timestamp is illustrative; the server records the actual time. This withdrawal changes retirement from R 100 000 to R 90 000. Savings stays at R 20 000, so the new total balance is R 110 000, the available withdrawal amount is R 99 000 and the notice count becomes 4. The frontend reloads the portfolio and history after success.
 
 PowerShell example:
 
@@ -263,13 +263,13 @@ Complete listing response for the savings/date filters above:
 ]
 ```
 
-The dashboard total withdrawn for these filters is R1,350 (R900 + R450). All-products history after the new R10,000 retirement withdrawal totals R13,150. These are withdrawal amounts, not the current investment balances. With no matching notices, the list returns `[]` and the displayed total is R0.00.
+The dashboard total withdrawn for these filters is R 1 350 (R900 + R450). All-products history after the new R 10 000 retirement withdrawal totals R 13 150. These are withdrawal amounts, not the current investment balances. With no matching notices, the list returns `[]` and the displayed total is R0,00.
 
  Export returns `text/csv;charset=UTF-8` with an attachment filename. The complete CSV for the same filtered savings records is:
 
 ```text
 sep=,
-Notice ID,Recorded at,Product,Amount ZAR,Balance before ZAR,Remaining balance ZAR
+Notice ID,Recorded at,Product,Amount (R),Balance before (R),Remaining balance (R)
 3,2026-09-08T10:00:00,"Savings investment",900.00,20900.00,20000.00
 2,2026-08-08T10:00:00,"Savings investment",450.00,21350.00,20900.00
 ```

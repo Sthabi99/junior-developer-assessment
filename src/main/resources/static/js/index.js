@@ -100,7 +100,7 @@ function renderProductHelp() {
 
   byId('eligibility-help').textContent = product.withdrawalAllowed
     ? product.eligibilityMessage
-    : 'Savings withdrawals remain available. Retirement requires an age above 65.';
+    : 'Savings withdrawals remain available. Retirement withdrawals are available only to investors older than 65.';
 }
 
 function renderPie() {

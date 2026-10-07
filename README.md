@@ -31,11 +31,11 @@ H2 saves the data to `data/investor-portal.mv.db`. Balances and notices survive 
 
 The first start creates three example investors with two products each:
 
-| Investor | Initial age | Retirement balance | Savings balance |
+| Investor | Initial age | Retirement balance (R) | Savings balance (R) |
 | --- | --- | --- | --- |
-| Thabo Dlamini | 67 | R100,000 | R20,000 |
-| Naledi Mokoena | 65 | R80,000 | R15,000 |
-| Sipho Nkosi | 40 | R50,000 | R30,000 |
+| Thabo Dlamini | 67 | R 100 000 | R 20 000 |
+| Naledi Mokoena | 65 | R 80 000 | R 15 000 |
+| Sipho Nkosi | 40 | R 50 000 | R 30 000 |
 
 These are labelled example accounts, not real investor records. Their dates of birth are calculated when the database is first created; displayed ages are then calculated from those saved dates. Existing data is not reset on restart. The accounts also include clearly labelled sample withdrawals from preceding months. No investment growth is simulated.
 
@@ -137,7 +137,7 @@ Screenshots show example accounts and notices created during verification.
 
 ## AI usage
 
-I used Copilot and Chagpt to explain the assessment, build and refine the UI, implement the Spring Boot backend, add tests, debug the integration and prepare documentation. Most of the implementation was AI-assisted. The comments explain the main decisions; this disclosure does not claim that the code was written without AI help.
+I used Copilot and ChatGPT to explain the assessment, build and refine the UI, implement the Spring Boot backend, add tests, debug the integration and prepare documentation. Most of the implementation was AI-assisted. The comments explain the main decisions; this disclosure does not claim that the code was written without AI help.
 
 ## Assumptions
 
