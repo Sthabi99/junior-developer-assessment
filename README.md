@@ -25,11 +25,11 @@ java -jar target/investor-portal-0.0.1-SNAPSHOT.jar
 
 Stop the running application before starting another copy on port 8080. If that port is busy, run `java -jar target/investor-portal-0.0.1-SNAPSHOT.jar --server.port=8081` and open port 8081 instead.
 
-## Database and example investors
+## Database and investor accounts
 
 H2 saves the data to `data/investor-portal.mv.db`. Balances and notices survive application restarts. The `data` folder is ignored by Git. For a fresh local database, stop the app and remove the `data` folder before restarting it.
 
-The first start creates three example investors with two products each:
+On first startup, the database creates three investor accounts with two products each:
 
 | Investor | Initial age | Retirement balance (R) | Savings balance (R) |
 | --- | --- | --- | --- |
@@ -37,21 +37,21 @@ The first start creates three example investors with two products each:
 | Naledi Mokoena | 65 | R 80 000 | R 15 000 |
 | Sipho Nkosi | 40 | R 50 000 | R 30 000 |
 
-These are labelled example accounts, not real investor records. Their dates of birth are calculated when the database is first created; displayed ages are then calculated from those saved dates. Existing data is not reset on restart. The accounts also include clearly labelled sample withdrawals from preceding months. No investment growth is simulated.
+Dates of birth are set when the database is first created, and ages are calculated from those saved dates. Account balances and withdrawal history are preserved when the application restarts.
 
-The selector demonstrates different portfolios and age rules. It is not a login system. Authentication and transferring real money are outside this assessment's scope.
+Use the investor selector to view each account's portfolio and withdrawal eligibility. The application records withdrawal notices; it does not process bank payments.
 
-The H2 console is available locally at **http://localhost:8080/h2-console**. Use JDBC URL `jdbc:h2:file:./data/investor-portal`, username `sa` and an empty password. This is a local assessment configuration, not a production security setup.
+The H2 console is available locally at **http://localhost:8080/h2-console**. Use JDBC URL `jdbc:h2:file:./data/investor-portal`, username `sa` and an empty password.
 
 ## Using the application
 
-1. Choose an example investor. The portfolio shows their details, products, total balance and eligible withdrawal amount.
+1. Choose an investor. The portfolio shows their details, products, total balance and eligible withdrawal amount.
 
 2. Select a product, enter an amount and create a withdrawal notice.
 
 3. View the saved notice and updated balance. The pie chart updates automatically.
 
-4. Filter history by product, From date or To date, then choose **Download CSV**. The total withdrawn amount updates for the selected product and date range. The backend exports the same filtered records.
+4. History opens with the last three months selected. Change the product, From date or To date, then choose **Download CSV**. The total withdrawn amount updates for the selected product and date range. The backend exports the same filtered records.
 
 ## Validation rules
 
@@ -85,7 +85,7 @@ src/main/java/com/enviro/assessment/junior/thabiso/kojoana/
   repository/  → Reads and saves database records
   model/       → Defines the investor, product and withdrawal entities
   exception/   → Describes validation and missing-record errors
-  config/      → Adds the example accounts and withdrawal history
+  config/      → Adds the initial accounts and withdrawal history
 
 src/main/resources/static/
   index.html       → Dashboard structure
@@ -121,7 +121,7 @@ The UI was also checked in Chrome with a separate database: profile switching, i
 
 ## Screenshots
 
-Screenshots show example accounts and notices created during verification.
+Screenshots show the portfolio, withdrawal validation and filtered history in the running application.
 
 ### Portfolio
 
@@ -141,8 +141,8 @@ I used Copilot and ChatGPT to support my development process. I first worked thr
 
 ## Assumptions
 
-Products are treated as retirement or savings investments. Creating a withdrawal notice immediately reduces its balance, as required by the balance-calculation exercise. There is no separate payment approval or settlement process. Dates and ages use the application's local timezone. The example-account selector is for assessment review, so the application does not provide production authentication.
+Products are treated as retirement or savings investments. Creating a withdrawal notice immediately reduces its balance, as required by the balance-calculation exercise. There is no separate payment approval or settlement process. Dates and ages use the application's local timezone. Investors are selected from the account list; no login is required.
 
-### Sample withdrawal history
+### Initial withdrawal history
 
-Fresh databases include three sample withdrawals for Thabo (retirement and savings), and two each for Naledi and Sipho (savings only). Amounts vary and dates are one month apart. Retirement samples follow the over-65 rule. Earlier balances account for these withdrawals and end at the current portfolio balances. Existing history is preserved; restarting does not duplicate records. These examples help demonstrate history filters and CSV downloads.
+A new database starts with three withdrawals for Thabo across retirement and savings, and two savings withdrawals each for Naledi and Sipho. Amounts vary and dates are one month apart. Retirement withdrawals follow the over-65 rule. Earlier balances account for these withdrawals and end at the current portfolio balances. Existing history is preserved, and restarting does not duplicate records. Use the product and date filters to review these withdrawals or export them as CSV.

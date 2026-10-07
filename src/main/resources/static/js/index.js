@@ -1,3 +1,14 @@
+function setDefaultHistoryDates() {
+  const today = new Date();
+  const from = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+  // Use the nearest valid day if that month is shorter than the current month.
+  const lastDay = new Date(from.getFullYear(), from.getMonth() + 1, 0).getDate();
+  from.setDate(Math.min(today.getDate(), lastDay));
+  const dateValue = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  byId('from').value = dateValue(from);
+  byId('to').value = dateValue(today);
+}
+
 // All portfolio data comes from Spring Boot. No balances are stored in this file.
 
 let portfolio = null;
@@ -340,9 +351,7 @@ byId('investor-select').addEventListener('change', async () => {
 
   byId('amount').value = '';
 
-  byId('from').value = '';
-
-  byId('to').value = '';
+  setDefaultHistoryDates();
 
   byId('history-product').value = '';
 
@@ -449,8 +458,7 @@ byId('product').addEventListener('change', () => {
 ['from', 'to', 'history-product'].forEach((id) => byId(id).addEventListener('change', loadHistory));
 
 byId('clear-filters').addEventListener('click', () => {
-  byId('from').value = '';
-  byId('to').value = '';
+  setDefaultHistoryDates();
   byId('history-product').value = '';
 
   loadHistory();
@@ -489,6 +497,7 @@ function formatDate(value) {
 }
 
 async function start() {
+  setDefaultHistoryDates();
   setBusy(true);
 
   try {

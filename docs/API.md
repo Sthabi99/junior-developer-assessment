@@ -1,6 +1,6 @@
 # API
 
-Base URL: `http://localhost:8080`. All JSON endpoints return `application/json`. Send `Content-Type: application/json` with POST requests. IDs in examples are illustrative; retrieve the actual IDs first.
+Base URL: `http://localhost:8080`. All JSON endpoints return `application/json`. Send `Content-Type: application/json` with POST requests. Retrieve investor and product IDs from the account and portfolio endpoints before sending a withdrawal request.
 
 | Method | Endpoint | Result |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ Complete example response when the database is first created on 8 October 2026:
 ]
 ```
 
-Selecting an investor in the UI loads their portfolio and withdrawal history. The account selector is for the assessment; it does not authenticate a user.
+Selecting an investor in the UI loads their portfolio and withdrawal history. The account selector loads the chosen investor's data without a login.
 
 ## Retrieve a portfolio
 
@@ -52,7 +52,7 @@ Selecting an investor in the UI loads their portfolio and withdrawal history. Th
 GET /api/investors/1/portfolio
 ```
 
-Complete example for a new database initialised on 8 October 2026, including Thabo's three sample notices and both products. IDs and timestamps are illustrative; existing databases may contain other records. No fields have been omitted.
+The response below shows Thabo's portfolio in a database initialised on 8 October 2026, including both products and the three initial withdrawals. Saved IDs, dates and balances depend on when the database was created and any subsequent withdrawals.
 
 ```json
 {
@@ -127,7 +127,7 @@ Content-Type: application/json
 
 Both fields are required. The amount must be positive with no more than two decimal places. Check the portfolio's `maximumWithdrawal` and `withdrawalAllowed` values, but the server still validates them against the current balance.
 
-Success returns **201 Created**, with `Location: /api/investors/1/withdrawals/8` in this example. Seven initial sample notices already exist across the accounts. The complete example response is:
+Success returns **201 Created**, with `Location: /api/investors/1/withdrawals/8` in this example. Seven initial notices already exist across the accounts. The complete example response is:
 
 ```json
 {
@@ -141,7 +141,7 @@ Success returns **201 Created**, with `Location: /api/investors/1/withdrawals/8`
 }
 ```
 
-The timestamp is illustrative; the server records the actual time. This withdrawal changes retirement from R 100 000 to R 90 000. Savings stays at R 20 000, so the new total balance is R 110 000, the available withdrawal amount is R 99 000 and the notice count becomes 4. The frontend reloads the portfolio and history after success.
+The server sets `createdAt` when it saves the notice. This withdrawal changes retirement from R 100 000 to R 90 000. Savings stays at R 20 000, so the new total balance is R 110 000, the available withdrawal amount is R 99 000 and the notice count becomes 4. The frontend reloads the portfolio and history after success.
 
 PowerShell example:
 
@@ -310,4 +310,4 @@ The response is **400 Bad Request**. No notice is saved and no balance changes. 
 }
 ```
 
-Errors handled by the portfolio controller use an empty `fieldErrors` object when no individual field is involved. Unexpected server errors use Spring Boot's default error response. The browser uses field errors for inline feedback. This local assessment application uses example-account selection instead of authentication.
+Errors handled by the portfolio controller use an empty `fieldErrors` object when no individual field is involved. Unexpected server errors use Spring Boot's default error response. The browser uses field errors for inline feedback. The application uses investor selection without a login.
