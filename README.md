@@ -47,11 +47,11 @@ The H2 console is available locally at **http://localhost:8080/h2-console**. Use
 
 1. Choose an investor. The portfolio shows their details, products, total balance and eligible withdrawal amount.
 
-2. Select a product, enter an amount and create a withdrawal notice.
+2. Select a product, enter an amount and create a withdrawal notice. Confirm the product and amount in the confirmation message, or cancel to leave the balance unchanged.
 
 3. View the saved notice and updated balance. The pie chart updates automatically.
 
-4. History opens with the last three months selected. Change the product, From date or To date, then choose **Download CSV**. The total withdrawn amount updates for the selected product and date range. The backend exports the same filtered records.
+4. History opens with the last three months selected. Choose 3 months, 6 months or Current month from the Period selector. Reset filters clears the dates and shows all history. Change the product, From date or To date, then choose **Download CSV**. The total withdrawn amount updates for the selected product and date range. The backend exports the same filtered records.
 
 ## Validation rules
 

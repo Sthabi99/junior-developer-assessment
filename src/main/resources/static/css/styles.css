@@ -609,3 +609,8 @@ button {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+.history-period {
+  max-width: 220px;
+  margin-top: 16px;
+}

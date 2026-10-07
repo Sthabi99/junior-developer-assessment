@@ -1,3 +1,7 @@
 package com.enviro.assessment.junior.thabiso.kojoana.model;
 
-public enum ProductType { RETIREMENT, SAVINGS }
+// Identifies whether the product uses retirement or savings rules.
+public enum ProductType {
+  RETIREMENT,
+  SAVINGS
+}

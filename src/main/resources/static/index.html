@@ -55,17 +55,15 @@
             <p id="available-total" class="withdrawal-summary-value"></p>
 
             <p class="withdrawal-summary-help">
-              Up to 90% of eligible product balances. Retirement withdrawals are available only to investors older than 65.
+              Up to 90% of eligible product balances. Retirement withdrawals are available only to
+              investors older than 65.
             </p>
 
-            <a class="withdrawal-summary-action" href="#withdrawal"
-              >Create withdrawal notice </a
-            >
+            <a class="withdrawal-summary-action" href="#withdrawal">Create withdrawal notice </a>
           </div>
 
           <a class="notice-link" href="#history"
-            ><span>Withdrawal notices</span><strong id="notice-count">0</strong
-            ></a
+            ><span>Withdrawal notices</span><strong id="notice-count">0</strong></a
           >
         </div>
       </section>
@@ -183,6 +181,17 @@
           <button id="clear-filters" type="button" class="secondary">Reset filters</button>
         </div>
 
+        <div class="history-period">
+          <label for="history-period">Period</label>
+          <select id="history-period">
+            <option value="3" selected>3 months</option>
+            <option value="6">6 months</option>
+            <option value="current">Current month</option>
+            <option value="all">All dates</option>
+            <option value="custom" disabled>Custom dates</option>
+          </select>
+        </div>
+
         <div class="history-total" role="status" aria-live="polite">
           <div>
             <p class="eyebrow">TOTAL WITHDRAWN</p>
@@ -211,8 +220,6 @@
           </table>
         </div>
       </section>
-
-
     </main>
 
     <footer class="container">Enviro365 investor portal Â· Assessment UI</footer>
