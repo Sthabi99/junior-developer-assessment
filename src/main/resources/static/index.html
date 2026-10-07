@@ -98,6 +98,11 @@
 
       <div class="filters"><div><label for="history-product">Product</label><select id="history-product"><option value="">All products</option></select></div><div><label for="from">From date</label><input type="date" id="from"></div><div><label for="to">To date</label><input type="date" id="to"></div><button id="clear-filters" type="button" class="secondary">Clear filters</button></div>
 
+      <div class="history-total" role="status" aria-live="polite">
+        <div><p class="eyebrow">TOTAL WITHDRAWN</p><p id="history-total-scope" class="muted">All products · All dates</p></div>
+        <strong id="history-total-amount">R 0,00</strong>
+      </div>
+
       <p id="filter-error" class="error" role="status"></p>
 
       <div class="table-wrap"><table><caption class="visually-hidden">Saved withdrawal notices</caption><thead><tr><th>Date</th><th>Product</th><th>Amount</th><th>Remaining balance</th></tr></thead><tbody id="history-rows"></tbody></table></div>

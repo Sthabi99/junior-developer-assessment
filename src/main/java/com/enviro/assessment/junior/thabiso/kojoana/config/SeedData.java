@@ -31,34 +31,53 @@ public class SeedData implements CommandLineRunner {
     }
 
     private void addSampleHistory() {
-        Investor thabo = investors.findAll().stream()
-            .filter(investor -> investor.getName().equals("Thabo Dlamini"))
-            .findFirst().orElse(null);
-        if (thabo == null) return;
-        // Leave existing history alone, including withdrawals entered through the UI.
-        if (!withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(thabo.getId()).isEmpty()) return;
-        InvestmentProduct savings = products.findByInvestorIdOrderById(thabo.getId()).stream()
-            .filter(product -> product.getType() == ProductType.SAVINGS)
-            .findFirst().orElseThrow();
+        for (Investor investor : investors.findAll()) {
+            var history = withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(investor.getId());
+            boolean isThabo = investor.getName().equals("Thabo Dlamini");
+            boolean isNaledi = investor.getName().equals("Naledi Mokoena");
+            boolean isSipho = investor.getName().equals("Sipho Nkosi");
+            if (!isThabo && !isNaledi && !isSipho) continue;
+            int targetCount = isThabo ? 3 : 2;
+            int remaining = targetCount - history.size();
+            if (remaining <= 0) continue;
 
-        // Do not duplicate sample history or overwrite existing savings withdrawals.
-        boolean hasSavingsHistory = withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(thabo.getId()).stream()
-            .anyMatch(notice -> notice.getProduct().getId().equals(savings.getId()));
-        if (hasSavingsHistory) return;
+            // Only seed products without history, so saved withdrawals stay untouched.
+            var investorProducts = products.findByInvestorIdOrderById(investor.getId());
+            for (InvestmentProduct product : investorProducts) {
+                boolean hasHistory = history.stream()
+                    .anyMatch(notice -> notice.getProduct().getId().equals(product.getId()));
+                if (hasHistory || remaining <= 0) continue;
+                if (product.getType() == ProductType.RETIREMENT) {
+                    int age = Period.between(investor.getDateOfBirth(), LocalDate.now()).getYears();
+                    if (age <= 65) continue;
+                    addProductHistory(product, new String[]{"1800.00"}, 3);
+                    remaining--;
+                } else {
+                    String[] amounts = isThabo ? new String[]{"450.00", "900.00"}
+                        : isNaledi ? new String[]{"350.00", "1250.00"}
+                        : new String[]{"800.00", "2100.00"};
+                    int count = Math.min(remaining, amounts.length);
+                    addProductHistory(product, java.util.Arrays.copyOf(amounts, count), count);
+                    remaining -= count;
+                }
+            }
+        }
+    }
 
+    private void addProductHistory(InvestmentProduct product, String[] amounts, int firstMonthAgo) {
         LocalDateTime today = LocalDate.now().atTime(10, 0);
-        BigDecimal balance = savings.getBalance().add(new BigDecimal("1800.00"));
-        savings.setOpeningDetails(balance, today.minusMonths(4));
-        String[] amounts = {"500.00", "600.00", "700.00"};
+        BigDecimal balance = product.getBalance();
+        for (String amount : amounts) balance = balance.add(new BigDecimal(amount));
+        product.setOpeningDetails(balance, today.minusMonths(firstMonthAgo + 1));
         for (int index = 0; index < amounts.length; index++) {
             BigDecimal amount = new BigDecimal(amounts[index]);
             BigDecimal remaining = balance.subtract(amount);
-            withdrawals.save(new WithdrawalNotice(savings, amount, balance, remaining,
-                today.minusMonths(3 - index)));
+            withdrawals.save(new WithdrawalNotice(product, amount, balance, remaining,
+                today.minusMonths(firstMonthAgo - index)));
             balance = remaining;
         }
-        // The last historical balance matches the balance already shown in the portfolio.
-        products.save(savings);
+        // Earlier balances account for the withdrawals; the current balance stays the same.
+        products.save(product);
     }
 
     private void add(String name, int age, String retirement, String savings) {

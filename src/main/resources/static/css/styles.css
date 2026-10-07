@@ -111,3 +111,10 @@ button { border-radius: 7px; }
 .filters > div { min-width: 150px; }
 [aria-invalid="true"] { border-color: #a52f2f; }
 .error:empty { display: none; }
+
+/* The total follows the same product and dates as the history table. */
+.history-total { display: flex; justify-content: space-between; align-items: center; gap: 16px; background: #f3f7fb; border: 1px solid #e0e8f1; border-radius: 10px; padding: 18px 20px; margin: 20px 0; }
+.history-total p { margin: 0; }
+.history-total .muted { margin-top: 6px; font-size: 12px; }
+.history-total strong { color: #153a60; font-size: 25px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 560px) { .history-total { align-items: flex-start; flex-direction: column; } }

@@ -129,6 +129,16 @@ function filters() {
 }
 
 function renderHistory() {
+  // Add amounts in cents to avoid decimal rounding errors.
+  let totalCents = 0;
+  notices.forEach(notice => { totalCents += Math.round(Number(notice.amount) * 100); });
+  byId('history-total-amount').textContent = money(totalCents / 100);
+  const productName = byId('history-product').selectedOptions[0].textContent;
+  const from = byId('from').value;
+  const to = byId('to').value;
+  const dates = from && to ? `${from} to ${to}`
+    : from ? `From ${from}` : to ? `Up to ${to}` : 'All dates';
+  byId('history-total-scope').textContent = `${productName} · ${dates}`;
   byId('history-rows').replaceChildren();
   byId('download').disabled = busy || notices.length === 0;
   if (!notices.length) {
@@ -149,6 +159,7 @@ async function loadHistory() {
   // Ignore an older filter response if a newer request has already started.
   const currentRequest = ++historyRequest;
   byId('download').disabled = true;
+  byId('history-total-amount').textContent = 'Loading…';
   try {
     const query = filters();
     const response = await request(`/api/investors/${portfolio.investor.id}/withdrawals?${query}`);
@@ -161,6 +172,7 @@ async function loadHistory() {
     if (currentRequest !== historyRequest) return;
     notices = [];
     renderHistory();
+    byId('history-total-amount').textContent = 'Unavailable';
     byId('filter-error').textContent = error.message;
   }
 }

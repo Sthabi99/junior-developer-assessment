@@ -37,7 +37,7 @@ The first start creates three example investors with two products each:
 | Naledi Mokoena | 65 | R80,000 | R15,000 |
 | Sipho Nkosi | 40 | R50,000 | R30,000 |
 
-These are labelled example accounts, not real investor records. Their dates of birth are calculated when the database is first created; displayed ages are then calculated from those saved dates. Existing data is not reset on restart. Thabo also has three clearly labelled sample savings withdrawals from the preceding three months. No investment growth is simulated.
+These are labelled example accounts, not real investor records. Their dates of birth are calculated when the database is first created; displayed ages are then calculated from those saved dates. Existing data is not reset on restart. The accounts also include clearly labelled sample withdrawals from preceding months. No investment growth is simulated.
 
 The selector demonstrates different portfolios and age rules. It is not a login system. Authentication and transferring real money are outside this assessment's scope.
 
@@ -48,7 +48,7 @@ The H2 console is available locally at **http://localhost:8080/h2-console**. Use
 1. Choose an example investor. The portfolio shows their details, products, total balance and eligible withdrawal amount.
 2. Select a product, enter an amount and create a withdrawal notice.
 3. View the saved notice and updated balance. The pie chart updates automatically.
-4. Filter history by product, From date or To date, then choose **Download CSV**. The backend exports the same filtered records.
+4. Filter history by product, From date or To date, then choose **Download CSV**. The total withdrawn amount updates for the selected product and date range. The backend exports the same filtered records.
 
 
 ## Validation rules
@@ -120,5 +120,4 @@ Products are treated as retirement or savings investments. Creating a withdrawal
 
 ### Sample withdrawal history
 
-Thabo has three sample savings withdrawals, one month apart, added when his savings history is empty. Earlier balances include these withdrawals and end at his current savings balance. Restarting does not duplicate saved notices. The dates are the same day of the preceding three months. These records are examples for trying the history filters and CSV download.
-
+Fresh databases include three sample withdrawals for Thabo (retirement and savings), and two each for Naledi and Sipho (savings only). Amounts vary and dates are one month apart. Retirement samples follow the over-65 rule. Earlier balances account for these withdrawals and end at the current portfolio balances. Existing history is preserved; restarting does not duplicate records. These examples help demonstrate history filters and CSV downloads.
