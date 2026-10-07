@@ -3,7 +3,7 @@ package com.enviro.assessment.junior.thabiso.kojoana.dto;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
-// Checks the product and amount sent by the withdrawal form.
+// These annotations reject missing IDs and invalid amounts before the controller saves a notice.
 public record WithdrawalRequest(
     @NotNull(message = "Choose an investment product.")
         @Positive(message = "Choose a valid product.")

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-// Reads the portfolio and saves withdrawals with their new balances.
+// Repository records are converted to response DTOs here; withdrawal saves also update the balance.
 public class PortfolioService {
   private final InvestorRepository investors;
   private final ProductRepository products;
@@ -73,7 +73,7 @@ public class PortfolioService {
       available = available.add(maximum);
       List<BalancePointDto> history = new ArrayList<>();
       history.add(new BalancePointDto(product.getOpenedAt(), product.getOpeningBalance()));
-      // Use recorded events only. Do not invent historical investment growth.
+      // Balance history contains the opening balance and saved withdrawal events.
       notices.stream()
           .filter(n -> n.getProduct().getId().equals(product.getId()))
           .sorted(
@@ -112,15 +112,15 @@ public class PortfolioService {
   @Transactional
   public WithdrawalDto createWithdrawal(Long investorId, WithdrawalRequest request) {
     Investor investor = investor(investorId);
-    // Lock the product until this transaction finishes. Another request must wait,
-    // then use the updated balance instead of spending the same balance twice.
+    // The product stays locked until this transaction finishes. Another request waits,
+    // then uses the updated balance instead of spending the same balance twice.
     InvestmentProduct product =
         products
             .findForWithdrawal(request.productId())
             .orElseThrow(() -> new NotFoundException("Product not found."));
     if (!product.getInvestor().getId().equals(investorId))
       throw new NotFoundException("Product does not belong to this investor.");
-    // Check the rules before changing the stored balance.
+    // Validation runs before the stored balance changes.
     rules.validate(
         product.getType(),
         investor.getDateOfBirth(),
@@ -128,7 +128,7 @@ public class PortfolioService {
         request.amount(),
         LocalDate.now());
     BigDecimal amount = request.amount().setScale(2, RoundingMode.UNNECESSARY);
-    // Keep the old balance in the notice so the change can be traced later.
+    // The notice includes the old balance so the withdrawal can be checked against it later.
     BigDecimal before = product.getBalance();
     BigDecimal remaining = before.subtract(amount);
     product.setBalance(remaining);
@@ -154,7 +154,7 @@ public class PortfolioService {
       if (!product.getInvestor().getId().equals(investorId))
         throw new NotFoundException("Product does not belong to this investor.");
     }
-    // Include both boundary dates and apply a product filter only when one was selected.
+    // Both selected dates are included. An empty product filter includes all products.
     return withdrawals.findByProductInvestorIdOrderByCreatedAtDescIdDesc(investorId).stream()
         .filter(n -> productId == null || n.getProduct().getId().equals(productId))
         .filter(n -> from == null || !n.getCreatedAt().toLocalDate().isBefore(from))
@@ -164,7 +164,7 @@ public class PortfolioService {
   }
 
   public String csv(List<WithdrawalDto> notices) {
-    // Tell Excel to use commas even when Windows uses a different list separator.
+    // The separator hint makes Excel split columns at commas, regardless of regional settings.
     StringBuilder csv =
         new StringBuilder(
             "\uFEFFsep=,\r\n"
@@ -188,7 +188,7 @@ public class PortfolioService {
   }
 
   private String csvCell(String text) {
-    // Quote text fields and prevent spreadsheet formulas from being interpreted.
+    // Quoted text can contain commas. The apostrophe also stops Excel treating it as a formula.
     if (text.matches("^[=+@-].*")) text = "'" + text;
     return "\"" + text.replace("\"", "\"\"") + "\"";
   }

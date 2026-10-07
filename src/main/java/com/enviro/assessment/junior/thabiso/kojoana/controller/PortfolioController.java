@@ -20,7 +20,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestController
 @RequestMapping("/api/investors")
-// Receives requests from the page and passes the work to the service.
+// The /api/investors endpoints call PortfolioService and return its results as JSON or CSV.
 public class PortfolioController {
   private final PortfolioService service;
 
@@ -38,7 +38,7 @@ public class PortfolioController {
     return service.portfolio(id);
   }
 
-  // Return the URL of the new notice after it has been saved.
+  // The Location header gives the URL where the saved notice can be retrieved.
   @PostMapping("/{id}/withdrawals")
   public ResponseEntity<WithdrawalDto> withdraw(
       @PathVariable Long id, @Valid @RequestBody WithdrawalRequest request) {
@@ -62,7 +62,7 @@ public class PortfolioController {
     return service.history(id, productId, from, to);
   }
 
-  // Export the same filtered records that appear in the history table.
+  // The CSV uses the history filters, so it contains the same matching withdrawals.
   @GetMapping("/{id}/withdrawals/export")
   public ResponseEntity<byte[]> export(
       @PathVariable Long id,
@@ -77,13 +77,13 @@ public class PortfolioController {
         .body(csv);
   }
 
-  // These methods handle errors from this controller only.
+  // These error responses apply to PortfolioController and include messages the page can display.
   @ExceptionHandler(NotFoundException.class)
   public ResponseEntity<ErrorDto> notFound(NotFoundException error) {
     return ResponseEntity.status(404).body(new ErrorDto(error.getMessage(), Map.of()));
   }
 
-  // Send the rule message back to the field that needs fixing.
+  // The field name lets the page place this rule message beside the affected input.
   @ExceptionHandler(ValidationException.class)
   public ResponseEntity<ErrorDto> invalidWithdrawal(ValidationException error) {
     return ResponseEntity.badRequest()

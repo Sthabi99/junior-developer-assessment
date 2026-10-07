@@ -2,6 +2,5 @@ package com.enviro.assessment.junior.thabiso.kojoana.dto;
 
 import java.time.LocalDate;
 
-// Only these fields are sent to the browser, not the JPA entities.
-// Sends only the investor details the page needs.
+// The account selector and heading use this ID, name, date of birth and calculated age.
 public record InvestorDto(Long id, String name, LocalDate dateOfBirth, int age) {}

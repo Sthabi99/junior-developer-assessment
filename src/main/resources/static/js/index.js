@@ -13,7 +13,7 @@ function setHistoryPeriod(period) {
   const from = new Date(today.getFullYear(), today.getMonth() - months, 1);
   if (period !== 'current') {
     // For example, counting back from the 31st may reach a month with only 30 days.
-    // Use its last valid day so JavaScript does not move into the following month.
+    // Using the last valid day prevents JavaScript from rolling into the next month.
     const lastDay = new Date(from.getFullYear(), from.getMonth() + 1, 0).getDate();
     from.setDate(Math.min(today.getDate(), lastDay));
   }
@@ -48,7 +48,7 @@ const money = (amount) =>
 const selectedProduct = () =>
   portfolio.products.find((product) => String(product.id) === byId('product').value);
 
-// Use one place to call the API and read its error messages.
+// API errors are read here so each form can use the same error format.
 async function request(url, options = {}) {
   const response = await fetch(url, options);
 
@@ -58,7 +58,7 @@ async function request(url, options = {}) {
     try {
       details = await response.json();
     } catch {
-      /* Use a plain message if the server is unavailable. */
+      /* Some failed responses have no JSON body, so the fallback message below is used. */
     }
 
     const error = new Error(details.message || 'The request failed. Please try again.');
@@ -71,7 +71,7 @@ async function request(url, options = {}) {
   return response;
 }
 
-// Stop extra clicks while a request is being saved or loaded.
+// The form stays disabled while a request is running to avoid duplicate submissions.
 function setBusy(value) {
   busy = value;
 
@@ -94,19 +94,19 @@ function setBusy(value) {
   byId('withdrawal-form').setAttribute('aria-busy', String(value));
 }
 
-// Keep Download disabled until history matches the filters and any export has finished.
+// Download is available once the current history has loaded and the previous export has finished.
 function updateDownloadButton() {
   byId('download').disabled = busy || historyLoading || downloading || notices.length === 0;
 }
 
-// Show the user whether the action succeeded or needs attention.
+// The same message area shows success messages and request errors.
 function message(text, isError = false) {
   byId('feedback').textContent = text;
 
   byId('feedback').className = isError ? 'error' : 'success';
 }
 
-// Clear old errors before checking the next input.
+// Errors from the previous attempt are cleared before the form is checked again.
 function clearErrors() {
   ['amount', 'product'].forEach((id) => byId(id).removeAttribute('aria-invalid'));
 
@@ -115,7 +115,7 @@ function clearErrors() {
   byId('product-error').textContent = '';
 }
 
-// Put each validation message beside the field that needs fixing.
+// The backend sends field names with validation errors. These match the amount and product fields.
 function showErrors(error) {
   const fields = error.fields || {};
 
@@ -134,7 +134,7 @@ function showErrors(error) {
   }
 }
 
-// Show the withdrawal limit for the selected product.
+// The selected product determines the amount limit and the eligibility message.
 function renderProductHelp() {
   const product = selectedProduct();
 
@@ -147,7 +147,7 @@ function renderProductHelp() {
     : 'Savings withdrawals remain available. Retirement withdrawals are available only to investors older than 65.';
 }
 
-// Compare the product balances as parts of the total portfolio.
+// Each pie slice shows that product's share of the total balance.
 function renderPie() {
   const total = Number(portfolio.totalBalance);
 
@@ -215,7 +215,7 @@ function renderPie() {
   );
 }
 
-// Refresh the account details, product choices and balances together.
+// A portfolio response supplies the account details, product choices and balances shown here.
 function renderPortfolio() {
   byId('investor-name').textContent = portfolio.investor.name;
 
@@ -263,7 +263,7 @@ function renderPortfolio() {
   renderPie();
 }
 
-// Use the same filters for the history table and CSV download.
+// Both history and CSV requests use these product and date values.
 function filters() {
   const from = byId('from').value;
 
@@ -282,9 +282,9 @@ function filters() {
   return query.toString();
 }
 
-// Display the matching withdrawals and add their amounts for the total.
+// Only withdrawals returned for the current filters are included in the table and total.
 function renderHistory() {
-  // Add amounts in cents to avoid decimal rounding errors.
+  // Amounts are added in cents because JavaScript decimal addition can produce small rounding errors.
 
   let totalCents = 0;
 
@@ -333,9 +333,10 @@ function renderHistory() {
   });
 }
 
-// Ask the backend for the selected investor and date range.
+// The history request includes the selected investor and the current filters.
 async function loadHistory() {
-  // Ignore an older filter response if a newer request has already started.
+  // Changing filters quickly can leave more than one request running.
+  // The request number stops an older response from replacing newer results.
 
   const currentRequest = ++historyRequest;
 
@@ -369,7 +370,7 @@ async function loadHistory() {
 
     byId('filter-error').textContent = error.message;
   } finally {
-    // An older request must not unlock Download while a newer request is still loading.
+    // Only the latest request clears the loading flag; earlier responses leave it alone.
     if (currentRequest === historyRequest) {
       historyLoading = false;
       updateDownloadButton();
@@ -377,7 +378,7 @@ async function loadHistory() {
   }
 }
 
-// Load the account selected in the investor dropdown.
+// The selected investor ID is used to fetch their portfolio.
 async function loadPortfolio() {
   const response = await request(`/api/investors/${byId('investor-select').value}/portfolio`);
 
@@ -387,7 +388,7 @@ async function loadPortfolio() {
 }
 
 byId('investor-select').addEventListener('change', async () => {
-  historyRequest++; // Discard outstanding history requests from the previous investor.
+  historyRequest++; // Responses still loading for the previous investor are now outdated.
 
   setBusy(true);
 
@@ -414,7 +415,7 @@ byId('investor-select').addEventListener('change', async () => {
   }
 });
 
-// Check the inputs first, then confirm and send the withdrawal to Spring Boot.
+// The form checks the amount and eligibility before showing confirmation or sending a request.
 byId('withdrawal-form').addEventListener('submit', async (event) => {
   event.preventDefault();
 
@@ -454,7 +455,7 @@ byId('withdrawal-form').addEventListener('submit', async (event) => {
     return;
   }
 
-  // Inputs have passed the browser checks. Now show the amount and its effect on balances.
+  // The amount has passed the browser checks. Confirmation explains the change to both balances.
   // Cancel returns here before the POST request, so no notice or balance change is saved.
   // Spring Boot checks the rules again if the user confirms.
   const confirmed = window.confirm(
@@ -516,7 +517,7 @@ byId('product').addEventListener('change', () => {
 byId('history-product').addEventListener('change', loadHistory);
 
 // If the user types a date, the preset no longer describes that range.
-// Mark it as custom, then reload the matching records and total from the backend.
+// The selector changes to Custom dates, and history is loaded for the typed range.
 ['from', 'to'].forEach((id) =>
   byId(id).addEventListener('change', () => {
     byId('history-period').value = byId('from').value || byId('to').value ? 'custom' : 'all';
@@ -540,11 +541,14 @@ byId('download').addEventListener('click', async () => {
   if (busy || historyLoading || downloading || !notices.length) return;
   downloading = true;
   updateDownloadButton();
-  // Keep the investor ID from this click even if the user switches accounts while downloading.
+
+  
+  // The filename uses the investor selected when Download was clicked.
+  // The saved ID keeps the filename linked to the account that requested the export.
   const investorId = portfolio.investor.id;
 
   try {
-    // Ask Spring Boot for exactly the same filtered records shown in the table.
+    // The export endpoint receives the same filters as the history request.
 
     const response = await request(`/api/investors/${investorId}/withdrawals/export?${filters()}`);
 
@@ -565,14 +569,14 @@ byId('download').addEventListener('click', async () => {
   }
 });
 
-// Show saved dates in a format that is easier to read.
+// Saved timestamps are displayed using the South African date format.
 function formatDate(value) {
   return new Intl.DateTimeFormat('en-ZA', { dateStyle: 'medium', timeStyle: 'short' }).format(
     new Date(value),
   );
 }
 
-// Load the investor list before trying to display a portfolio.
+// The account list loads first because the portfolio request needs an investor ID.
 async function start() {
   setDefaultHistoryDates();
   setBusy(true);
@@ -596,7 +600,7 @@ async function start() {
 
     setBusy(false);
   } catch (error) {
-    // Keep the form disabled until a real portfolio has loaded.
+    // A failed startup leaves the form disabled because there is no portfolio to submit against.
 
     byId('investor-name').textContent = 'Portfolio unavailable';
 

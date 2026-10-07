@@ -3,8 +3,7 @@ package com.enviro.assessment.junior.thabiso.kojoana.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
-// Only these fields are sent to the browser, not the JPA entities.
-// Sends a product balance, withdrawal limit and eligibility to the page.
+// The form uses the eligibility flag and maximum withdrawal to check the selected product.
 public record ProductDto(
     Long id,
     String name,

@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-// Starts Spring Boot and serves the API and the web page.
+// Spring Boot starts here and finds the controllers, services and repositories in this package.
 public class InvestorPortalAssessmentApplication {
 
   public static void main(String[] args) {

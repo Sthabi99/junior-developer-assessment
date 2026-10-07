@@ -285,7 +285,7 @@ footer {
   border: 0;
 }
 
-/* Dashboard styling and the local pie chart. No chart library is needed. */
+/* Dashboard panels and the CSS pie chart. */
 
 body {
   background: radial-gradient(ellipse at top right, #e8eff7, transparent 55%), #f4f6f9;
@@ -400,7 +400,7 @@ button {
   color: #5f7083;
 }
 
-/* Keep the investor and total together, with notices as a secondary action. */
+/* The account header groups the investor name, total balance and notice link. */
 
 .investor-summary {
   display: flex;
@@ -466,7 +466,7 @@ button {
   gap: 20px;
 }
 
-/* Withdrawal availability belongs beside the total balance at the top. */
+/* The dark balance card displays the combined amount currently available to withdraw. */
 
 .investor-summary {
   align-items: center;

@@ -3,6 +3,5 @@ package com.enviro.assessment.junior.thabiso.kojoana.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// Only these fields are sent to the browser, not the JPA entities.
-// Keeps the date and balance of a recorded product event.
+// Each entry pairs an opening or withdrawal date with the balance recorded at that time.
 public record BalancePointDto(LocalDateTime recordedAt, BigDecimal balance) {}

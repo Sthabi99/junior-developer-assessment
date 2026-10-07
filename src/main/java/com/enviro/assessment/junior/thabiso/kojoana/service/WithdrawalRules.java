@@ -7,9 +7,9 @@ import java.time.*;
 import org.springframework.stereotype.Component;
 
 @Component
-// Keeps the age and amount rules in one place.
+// These rules are shared by portfolio eligibility checks and withdrawal validation.
 public class WithdrawalRules {
-  // Count completed years, rather than just subtracting the birth year.
+  // Age uses completed years, so someone whose birthday is still coming up is not counted a year older.
   public int age(LocalDate birthDate, LocalDate today) {
     return Period.between(birthDate, today).getYears();
   }
@@ -20,7 +20,7 @@ public class WithdrawalRules {
   }
 
   public BigDecimal maximum(BigDecimal balance) {
-    // Round down so the accepted amount never exceeds 90%, even by a cent.
+    // Rounding down keeps the maximum within 90%, including balances that leave a fraction of a cent.
     return balance.multiply(new BigDecimal("0.90")).setScale(2, RoundingMode.DOWN);
   }
 

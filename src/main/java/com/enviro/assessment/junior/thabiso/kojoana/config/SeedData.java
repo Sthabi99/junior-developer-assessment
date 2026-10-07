@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-// Adds the initial accounts and history when the database needs them.
+// Startup creates the three accounts if they are missing, then fills any eligible empty history.
 public class SeedData implements CommandLineRunner {
   private final InvestorRepository investors;
   private final ProductRepository products;
@@ -48,7 +48,7 @@ public class SeedData implements CommandLineRunner {
       int remaining = targetCount - history.size();
       if (remaining <= 0) continue;
 
-      // Only seed products without history, so saved withdrawals stay untouched.
+      // Products with saved history are skipped, so restarting does not duplicate withdrawals.
       var investorProducts = products.findByInvestorIdOrderById(investor.getId());
       for (InvestmentProduct product : investorProducts) {
         boolean hasHistory =
