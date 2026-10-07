@@ -78,7 +78,7 @@ See [API.md](docs/API.md) for endpoints, request/response examples, filters and 
 The Java package is `com.enviro.assessment.junior.thabiso.kojoana`.
 
 ```text
-src/main/java/.../kojoana/
+src/main/java/com/enviro/assessment/junior/thabiso/kojoana/
   controller/  → Receives HTTP requests and returns responses
   dto/         → Defines request and response fields
   service/     → Checks withdrawal rules and calculates balances
@@ -91,9 +91,11 @@ src/main/resources/static/
   index.html       → Dashboard structure
   css/styles.css   → Desktop styling
   js/index.js      → Handles selections, forms and API requests
-  images/          → Portal flow diagram
 
-src/test/          → Automated tests and isolated database settings
+src/test/java/com/enviro/assessment/junior/thabiso/kojoana/
+                   → JUnit rule, API and sample-history tests
+src/test/resources/application.properties
+                   → Isolated in-memory H2 test settings
 ```
 
 A request follows this path:
@@ -138,9 +140,3 @@ Products are treated as retirement or savings investments. Creating a withdrawal
 ### Sample withdrawal history
 
 Fresh databases include three sample withdrawals for Thabo (retirement and savings), and two each for Naledi and Sipho (savings only). Amounts vary and dates are one month apart. Retirement samples follow the over-65 rule. Earlier balances account for these withdrawals and end at the current portfolio balances. Existing history is preserved; restarting does not duplicate records. These examples help demonstrate history filters and CSV downloads.
-
-## How the portal works
-
-![Investor selection, accepted withdrawal and rejected withdrawal](src/main/resources/static/images/portal-flow.png)
-
-The same diagram is available below withdrawal history in the dashboard.

@@ -617,20 +617,3 @@ button {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-
-/* Keep the explanation below the main account tasks. */
-.portal-guide summary {
-  color: #153a60;
-  font-size: 18px;
-  font-weight: 650;
-  cursor: pointer;
-}
-.portal-guide img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-}
-.portal-guide details[open] summary {
-  margin-bottom: 16px;
-}

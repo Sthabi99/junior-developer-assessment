@@ -11,36 +11,108 @@ Base URL: `http://localhost:8080`. All JSON endpoints return `application/json`.
 | GET | `/api/investors/{id}/withdrawals/{noticeId}` | One notice belonging to that investor |
 | GET | `/api/investors/{id}/withdrawals/export` | Download filtered CSV |
 
+## Select an investor
+
+Request the accounts first and use the returned investor ID in subsequent URLs.
+
+```http
+GET /api/investors
+```
+
+Complete example response when the database is first created on 8 October 2026:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Thabo Dlamini",
+    "dateOfBirth": "1959-10-08",
+    "age": 67
+  },
+  {
+    "id": 2,
+    "name": "Naledi Mokoena",
+    "dateOfBirth": "1961-10-08",
+    "age": 65
+  },
+  {
+    "id": 3,
+    "name": "Sipho Nkosi",
+    "dateOfBirth": "1986-10-08",
+    "age": 40
+  }
+]
+```
+
+Selecting an investor in the UI loads their portfolio and withdrawal history. The account selector is for the assessment; it does not authenticate a user.
+
 ## Retrieve a portfolio
 
 ```http
 GET /api/investors/1/portfolio
 ```
 
-Example fields before any withdrawals (timestamp fields are generated when data is saved):
+Complete example for a new database initialized on 8 October 2026, including Thabo's three sample notices and both products. IDs and timestamps are illustrative; existing databases may contain other records. No fields have been omitted.
 
 ```json
 {
-  "investor": {"id": 1, "name": "Thabo Dlamini", "dateOfBirth": "1959-10-08", "age": 67},
-  "totalBalance": 120000.00,
-  "availableToWithdraw": 108000.00,
-  "noticeCount": 0,
+  "investor": {
+    "id": 1,
+    "name": "Thabo Dlamini",
+    "dateOfBirth": "1959-10-08",
+    "age": 67
+  },
+  "totalBalance": 120000.0,
+  "availableToWithdraw": 108000.0,
+  "noticeCount": 3,
   "products": [
     {
       "id": 1,
       "name": "Retirement investment",
       "type": "RETIREMENT",
-      "balance": 100000.00,
-      "maximumWithdrawal": 90000.00,
+      "balance": 100000,
+      "maximumWithdrawal": 90000.0,
       "withdrawalAllowed": true,
       "eligibilityMessage": "Up to 90% of the current balance.",
-      "history": []
+      "history": [
+        {
+          "recordedAt": "2026-06-08T10:00:00",
+          "balance": 101800
+        },
+        {
+          "recordedAt": "2026-07-08T10:00:00",
+          "balance": 100000
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Savings investment",
+      "type": "SAVINGS",
+      "balance": 20000,
+      "maximumWithdrawal": 18000.0,
+      "withdrawalAllowed": true,
+      "eligibilityMessage": "Up to 90% of the current balance.",
+      "history": [
+        {
+          "recordedAt": "2026-07-08T10:00:00",
+          "balance": 21350
+        },
+        {
+          "recordedAt": "2026-08-08T10:00:00",
+          "balance": 20900
+        },
+        {
+          "recordedAt": "2026-09-08T10:00:00",
+          "balance": 20000
+        }
+      ]
     }
   ]
 }
 ```
 
-This example is shortened: the actual response includes both products and their opening balance point. Each history point contains `recordedAt` and `balance`. The date of birth above reflects an example account created on the verification date; it is not a required request value.
+`totalBalance` adds both product balances. `availableToWithdraw` adds 90% of each eligible product's balance. For an investor aged 65 or younger, retirement has `withdrawalAllowed: false`, `maximumWithdrawal: 0.00`, and the message `Retirement withdrawals require an age above 65.` Savings remains eligible. `history` begins with the product's opening balance and includes the remaining balance after each saved withdrawal; it does not represent investment growth.
 
 ## Create a notice
 
@@ -55,11 +127,11 @@ Content-Type: application/json
 
 Both fields are required. The amount must be positive with no more than two decimal places. Check the portfolio's `maximumWithdrawal` and `withdrawalAllowed` values, but the server still validates them against the current balance.
 
-Success returns **201 Created**, a `Location` header for the notice, and these response fields:
+Success returns **201 Created**, with `Location: /api/investors/1/withdrawals/8` in this example. Seven initial sample notices already exist across the accounts. The complete example response is:
 
 ```json
 {
-  "id": 1,
+  "id": 8,
   "productId": 1,
   "productName": "Retirement investment",
   "amount": 10000.00,
@@ -69,13 +141,84 @@ Success returns **201 Created**, a `Location` header for the notice, and these r
 }
 ```
 
-The timestamp is an example format; the server records the actual time.
+The timestamp is illustrative; the server records the actual time. This withdrawal changes retirement from R100,000 to R90,000. Savings stays at R20,000, so the new total balance is R110,000, the available withdrawal amount is R99,000 and the notice count becomes 4. The frontend reloads the portfolio and history after success.
 
 PowerShell example:
 
 ```powershell
 $body = @{ productId = 1; amount = 10000 } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/api/investors/1/withdrawals' -ContentType 'application/json' -Body $body
+```
+
+## Retrieve the saved notice
+
+Use the URL from the creation response's `Location` header. The notice must belong to the investor in the URL.
+
+```http
+GET /api/investors/1/withdrawals/8
+```
+
+Complete example response after the successful withdrawal above:
+
+```json
+{
+  "id": 8,
+  "productId": 1,
+  "productName": "Retirement investment",
+  "amount": 10000.0,
+  "balanceBefore": 100000.0,
+  "remainingBalance": 90000.0,
+  "createdAt": "2026-10-08T12:46:00"
+}
+```
+
+## Retrieve all withdrawal history
+
+```http
+GET /api/investors/1/withdrawals
+```
+
+The response is an array of complete notice objects, ordered newest first. After the withdrawal above, the complete example is:
+
+```json
+[
+  {
+    "id": 8,
+    "productId": 1,
+    "productName": "Retirement investment",
+    "amount": 10000.0,
+    "balanceBefore": 100000.0,
+    "remainingBalance": 90000.0,
+    "createdAt": "2026-10-08T12:46:00"
+  },
+  {
+    "id": 3,
+    "productId": 2,
+    "productName": "Savings investment",
+    "amount": 900.0,
+    "balanceBefore": 20900.0,
+    "remainingBalance": 20000.0,
+    "createdAt": "2026-09-08T10:00:00"
+  },
+  {
+    "id": 2,
+    "productId": 2,
+    "productName": "Savings investment",
+    "amount": 450.0,
+    "balanceBefore": 21350.0,
+    "remainingBalance": 20900.0,
+    "createdAt": "2026-08-08T10:00:00"
+  },
+  {
+    "id": 1,
+    "productId": 1,
+    "productName": "Retirement investment",
+    "amount": 1800.0,
+    "balanceBefore": 101800.0,
+    "remainingBalance": 100000.0,
+    "createdAt": "2026-07-08T10:00:00"
+  }
+]
 ```
 
 ## History and export filters
@@ -91,14 +234,44 @@ Both list and export accept the same optional query parameters:
 Example:
 
 ```http
-GET /api/investors/1/withdrawals?productId=1&from=2026-10-01&to=2026-10-31
-GET /api/investors/1/withdrawals/export?productId=1&from=2026-10-01&to=2026-10-31
+GET /api/investors/1/withdrawals?productId=2&from=2026-08-01&to=2026-09-30
+GET /api/investors/1/withdrawals/export?productId=2&from=2026-08-01&to=2026-09-30
 ```
 
-Listing returns an array of notice objects, or `[]` if nothing matches. Export returns `text/csv;charset=UTF-8` with an attachment filename. It uses these columns:
+Complete listing response for the savings/date filters above:
+
+```json
+[
+  {
+    "id": 3,
+    "productId": 2,
+    "productName": "Savings investment",
+    "amount": 900.0,
+    "balanceBefore": 20900.0,
+    "remainingBalance": 20000.0,
+    "createdAt": "2026-09-08T10:00:00"
+  },
+  {
+    "id": 2,
+    "productId": 2,
+    "productName": "Savings investment",
+    "amount": 450.0,
+    "balanceBefore": 21350.0,
+    "remainingBalance": 20900.0,
+    "createdAt": "2026-08-08T10:00:00"
+  }
+]
+```
+
+The dashboard total withdrawn for these filters is R1,350 (R900 + R450). All-products history after the new R10,000 retirement withdrawal totals R13,150. These are withdrawal amounts, not the current investment balances. With no matching notices, the list returns `[]` and the displayed total is R0.00.
+
+ Export returns `text/csv;charset=UTF-8` with an attachment filename. The complete CSV for the same filtered savings records is:
 
 ```text
+sep=,
 Notice ID,Recorded at,Product,Amount ZAR,Balance before ZAR,Remaining balance ZAR
+3,2026-09-08T10:00:00,"Savings investment",900.00,20900.00,20000.00
+2,2026-08-08T10:00:00,"Savings investment",450.00,21350.00,20900.00
 ```
 
 The file starts with a UTF-8 byte order mark and an Excel `sep=,` hint so each heading and value opens in its own column, including on computers with a different regional list separator. When importing with another CSV tool, skip the separator-hint line.
@@ -114,7 +287,21 @@ Amounts use a decimal point without currency symbols or thousands separators. Te
 | 409 | A concurrent update could not obtain the balance lock; refresh before retrying |
 | 500 | Unexpected failure; detailed exception information stays in the server log |
 
-Example rule error:
+For example, this request is rejected because Naledi is exactly 65 and product 3 is her retirement investment:
+
+```http
+POST /api/investors/2/withdrawals
+Content-Type: application/json
+```
+
+```json
+{
+  "productId": 3,
+  "amount": 100.00
+}
+```
+
+The response is **400 Bad Request**. No notice is saved and no balance changes. Complete response:
 
 ```json
 {
