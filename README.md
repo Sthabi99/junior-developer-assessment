@@ -112,7 +112,7 @@ Screenshots show example accounts and notices created during verification.
 
 ## AI usage
 
-I used ChatGPT/Codex to explain the assessment, build and refine the UI, implement the Spring Boot backend, add tests, debug the integration and prepare documentation. Most of the implementation was AI-assisted. The comments explain the main decisions; this disclosure does not claim that the code was written without AI help.
+I used Copilot and Chagpt to explain the assessment, build and refine the UI, implement the Spring Boot backend, add tests, debug the integration and prepare documentation. Most of the implementation was AI-assisted. The comments explain the main decisions; this disclosure does not claim that the code was written without AI help.
 
 ## Assumptions
 
