@@ -137,7 +137,7 @@ Screenshots show example accounts and notices created during verification.
 
 ## AI usage
 
-I used Copilot and ChatGPT to explain the assessment, build and refine the UI, implement the Spring Boot backend, add tests, debug the integration and prepare documentation. Most of the implementation was AI-assisted. The comments explain the main decisions; this disclosure does not claim that the code was written without AI help.
+I used Copilot and ChatGPT to support my development process. I first worked through the assessment requirements and planned my approach, then gave the tools specific context to help build and refine the UI. I implemented the Spring Boot backend, used Copilot to assist with writing tests, and troubleshot integration issues. I also prepared the documentation, using AI to improve the wording. Throughout the process, I guided the work, reviewed suggested changes against my understanding, and tested their behaviour rather than accepting AI-generated output without checking it. The code comments explain the main implementation decisions.
 
 ## Assumptions
 
